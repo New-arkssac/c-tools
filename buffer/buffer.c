@@ -1,8 +1,6 @@
 #include "buffer.h"
 #include <memory.h>
 #include <stdarg.h>
-#include <stdatomic.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 #define __new_a_bufferer(cap) malloc(cap)
