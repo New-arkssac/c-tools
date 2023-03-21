@@ -1,11 +1,12 @@
 #include "bufexp.h"
 #include "buffer.h"
-#include <stdio.h>
 #include <stdlib.h>
 
 unsigned int hash_buffer(Buffer *string);
 int utf8_buffer(const char byte);
 
+// Check if a substring is a prefix of the main string.
+// Return 1 if it exists, 0 if it does not.
 int buffer_perfix(Buffer s, Buffer perfix) {
   int s_len = s.lenght;
   int perfix_len = perfix.lenght;
@@ -29,6 +30,8 @@ int buffer_perfix(Buffer s, Buffer perfix) {
   return 1;
 }
 
+// Check if a substring is a suffix of the main string.
+// Return 1 if it exists, 0 if it does not.
 int buffer_suffix(Buffer s, Buffer suffix) {
   int s_len = s.lenght;
   int suffix_len = suffix.lenght;
@@ -54,6 +57,8 @@ int buffer_suffix(Buffer s, Buffer suffix) {
   return 1;
 }
 
+// Return the index where the substring appears in the main string, return -1 if
+// not found. Use the RK algorithm.
 int buffer_index(Buffer s, Buffer sep) {
   int s_len = s.lenght;
   int sep_len = sep.lenght;
@@ -94,10 +99,12 @@ int buffer_index(Buffer s, Buffer sep) {
   return -1;
 }
 
+// Return 1 if the substring appears in the main string, 0 if not.
 int buffer_contains(Buffer s, Buffer substr) {
   return buffer_index(s, substr) >= 0;
 }
 
+// Count the number of times the substring appears in the main string.
 int buffer_count(Buffer s, Buffer sep) {
   int sep_len = sep.lenght;
   if (sep_len <= 0) {
@@ -121,6 +128,9 @@ int buffer_count(Buffer s, Buffer sep) {
   }
 }
 
+// Split the position of the substring in the main string. If the substring
+// exists, assign the nested before and after strings after cutting to the
+// parameter *result.
 int buffer_cut(Buffer s, Buffer sep, Buffer *result) {
   int i = buffer_index(s, sep);
   if (i >= 0) {
@@ -145,6 +155,7 @@ int buffer_cut(Buffer s, Buffer sep, Buffer *result) {
   return 1;
 }
 
+// Concatenate strings in the buffer with sep to form a single buffer.
 int buffer_join(Buffer s, Buffer sep, Buffer *result) {
   if (s.type_size != sizeof(Buffer)) {
     return ERR_TYPE_SIZE_NOT_EQUAL;
@@ -191,6 +202,7 @@ int buffer_join(Buffer s, Buffer sep, Buffer *result) {
   return 0;
 }
 
+// The hash function required for the RK algorithm.
 unsigned int hash_buffer(Buffer *s) {
   const unsigned int prime_RK = 16777619;
   unsigned int hash = 0;
@@ -214,7 +226,8 @@ unsigned int hash_buffer(Buffer *s) {
   return hash ^ pow;
 }
 
-// int utf8_rune(const char byte) {
+// Check if a character is encoded in UTF-8 and return the corresponding
+// character sequence.
 int utf8_buffer(const char byte) {
   unsigned char bt = byte;
   int len = 0;
