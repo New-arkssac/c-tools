@@ -1,26 +1,25 @@
-#include "bufexp.h"
-#include "buffer.h"
-#include <stdlib.h>
+#include "strexp.h"
+#include "array.h"
 
-unsigned int hash_buffer(Buffer *string);
+unsigned int hash_buffer(array_buffer *string);
 int utf8_buffer(const char byte);
 
 // Check if a substring is a prefix of the main string.
 // Return 1 if it exists, 0 if it does not.
-int buffer_perfix(Buffer s, Buffer perfix) {
+int array_perfix(array_buffer s, array_buffer perfix) {
   int s_len = s.lenght;
   int perfix_len = perfix.lenght;
 
-  if (s_len == 0 || perfix_len == 0 || s_len < perfix_len || buffer_null(&s)) {
+  if (s_len == 0 || perfix_len == 0 || s_len < perfix_len || array_null(&s)) {
     return 0;
   }
 
-  Buffer sep = s;
+  array_buffer sep = s;
 
   char n, m;
   for (int i = 0; i < perfix_len; i++) {
-    buffer_get(&sep, &n, i);
-    buffer_get(&perfix, &m, i);
+    array_get(&sep, &n, i);
+    array_get(&perfix, &m, i);
 
     if (n != m) {
       return 0;
@@ -32,22 +31,22 @@ int buffer_perfix(Buffer s, Buffer perfix) {
 
 // Check if a substring is a suffix of the main string.
 // Return 1 if it exists, 0 if it does not.
-int buffer_suffix(Buffer s, Buffer suffix) {
+int array_suffix(array_buffer s, array_buffer suffix) {
   int s_len = s.lenght;
   int suffix_len = suffix.lenght;
 
-  if (s_len == 0 || suffix_len == 0 || s_len < suffix_len || buffer_null(&s)) {
+  if (s_len == 0 || suffix_len == 0 || s_len < suffix_len || array_null(&s)) {
     return 0;
   }
 
-  Buffer sep = s;
+  array_buffer sep = s;
 
   sep.buffer = s.buffer + (s_len - suffix_len) * s.type_size;
 
   char n, m;
   for (int i = 0; i < suffix_len; i++) {
-    buffer_get(&sep, &n, i);
-    buffer_get(&suffix, &m, i);
+    array_get(&sep, &n, i);
+    array_get(&suffix, &m, i);
 
     if (n != m) {
       return 0;
@@ -59,7 +58,7 @@ int buffer_suffix(Buffer s, Buffer suffix) {
 
 // Return the index where the substring appears in the main string, return -1 if
 // not found. Use the RK algorithm.
-int buffer_index(Buffer s, Buffer sep) {
+int array_index(array_buffer s, array_buffer sep) {
   int s_len = s.lenght;
   int sep_len = sep.lenght;
   if (s_len <= 0 || sep_len <= 0) {
@@ -67,8 +66,8 @@ int buffer_index(Buffer s, Buffer sep) {
   }
 
   int sep_hash = hash_buffer(&sep), s_hash = 0, k, j;
-  void *ma = buffer_ptr(&s);
-  Buffer sh = sep;
+  void *ma = array_ptr(&s);
+  array_buffer sh = sep;
 
   char c1, c2;
   for (int i = 0, sp; i <= s_len - sep_len; i += sp) {
@@ -84,8 +83,8 @@ int buffer_index(Buffer s, Buffer sep) {
       continue;
 
     for (j = 0; j < sep_len; j++) {
-      buffer_get(&sh, &c1, j);
-      buffer_get(&sep, &c2, j);
+      array_get(&sh, &c1, j);
+      array_get(&sep, &c2, j);
 
       if (c1 != c2)
         break;
@@ -100,51 +99,51 @@ int buffer_index(Buffer s, Buffer sep) {
 }
 
 // Return 1 if the substring appears in the main string, 0 if not.
-int buffer_contains(Buffer s, Buffer substr) {
-  return buffer_index(s, substr) >= 0;
+int array_contains(array_buffer s, array_buffer substr) {
+  return array_index(s, substr) >= 0;
 }
 
 // Count the number of times the substring appears in the main string.
-int buffer_count(Buffer s, Buffer sep) {
+int array_count(array_buffer s, array_buffer sep) {
   int sep_len = sep.lenght;
   if (sep_len <= 0) {
     return -1;
   }
 
   int num = 0;
-  Buffer sub;
-  buffer_clone(&s, &sub);
+  array_buffer sub;
+  array_clone(&s, &sub);
 
   for (int n = 0, i = 0;;) {
-    n = buffer_index(sub, sep);
-    buffer_release(1, &sub);
+    n = array_index(sub, sep);
+    array_release(1, &sub);
     if (n == -1) {
       return num;
     }
 
     num++;
     i += n + sep_len;
-    sub = buffer_slice(&s, i, s.lenght);
+    sub = array_slice(&s, i, s.lenght);
   }
 }
 
 // Split the position of the substring in the main string. If the substring
 // exists, assign the nested before and after strings after cutting to the
 // parameter *result.
-int buffer_cut(Buffer s, Buffer sep, Buffer *result) {
-  int i = buffer_index(s, sep);
+int array_cut(array_buffer s, array_buffer sep, array_buffer *result) {
+  int i = array_index(s, sep);
   if (i >= 0) {
     int err;
-    Buffer bk = new_buffer(2, sizeof(Buffer));
-    Buffer before = buffer_slice(&s, 0, i);
-    Buffer after = buffer_slice(&s, i + sep.lenght, s.lenght);
-    if ((err = buffer_add(&bk, &before)) != 0) {
-      buffer_release(3, &bk, &before, &after);
+    array_buffer bk = new_array(2, sizeof(array_buffer));
+    array_buffer before = array_slice(&s, 0, i);
+    array_buffer after = array_slice(&s, i + sep.lenght, s.lenght);
+    if ((err = array_add(&bk, &before)) != 0) {
+      array_release(3, &bk, &before, &after);
       return err;
     }
 
-    if ((err = buffer_add(&bk, &after)) != 0) {
-      buffer_release(3, &bk, &before, &after);
+    if ((err = array_add(&bk, &after)) != 0) {
+      array_release(3, &bk, &before, &after);
       return err;
     }
 
@@ -156,44 +155,44 @@ int buffer_cut(Buffer s, Buffer sep, Buffer *result) {
 }
 
 // Concatenate strings in the buffer with sep to form a single buffer.
-int buffer_join(Buffer s, Buffer sep, Buffer *result) {
-  if (s.type_size != sizeof(Buffer)) {
+int array_join(array_buffer s, array_buffer sep, array_buffer *result) {
+  if (s.type_size != sizeof(array_buffer)) {
     return ERR_TYPE_SIZE_NOT_EQUAL;
   }
 
   switch (s.lenght) {
   case 0:
-    *result = new_buffer(0, sep.type_size);
+    *result = new_array(0, sep.type_size);
     return 1;
   case 1:
-    buffer_get(&s, &result, 0);
+    array_get(&s, &result, 0);
     break;
   }
 
-  Buffer tp;
+  array_buffer tp;
   int err, n = s.lenght * (sep.lenght - 1);
   for (int i = 0; i < s.lenght; i++) {
-    if ((err = buffer_get(&s, &tp, i)) != 0)
+    if ((err = array_get(&s, &tp, i)) != 0)
       return 1;
     n += tp.lenght;
   }
 
-  Buffer string = new_buffer(n, sizeof(char));
-  buffer_get(&s, &tp, 0);
-  if ((err = buffer_append(&string, &tp)) != 0) {
-    buffer_release(1, &string);
+  array_buffer string = new_array(n, sizeof(char));
+  array_get(&s, &tp, 0);
+  if ((err = array_append(&string, &tp)) != 0) {
+    array_release(1, &string);
     return 1;
   }
 
   for (int i = 1; i < s.lenght; i++) {
-    if ((err = buffer_append(&string, &sep)) != 0) {
-      buffer_release(1, &string);
+    if ((err = array_append(&string, &sep)) != 0) {
+      array_release(1, &string);
       return 1;
     }
 
-    buffer_get(&s, &tp, i);
-    if ((err = buffer_append(&string, &tp)) != 0) {
-      buffer_release(1, &string);
+    array_get(&s, &tp, i);
+    if ((err = array_append(&string, &tp)) != 0) {
+      array_release(1, &string);
       return 1;
     }
   }
@@ -203,12 +202,12 @@ int buffer_join(Buffer s, Buffer sep, Buffer *result) {
 }
 
 // The hash function required for the RK algorithm.
-unsigned int hash_buffer(Buffer *s) {
+unsigned int hash_buffer(array_buffer *s) {
   const unsigned int prime_RK = 16777619;
   unsigned int hash = 0;
   char elem[s->type_size];
   for (int i = 0; i < s->lenght; i++) {
-    if (buffer_get(s, elem, i) != 0) {
+    if (array_get(s, elem, i) != 0) {
       return -1;
     };
     hash = (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
