@@ -15,11 +15,20 @@ struct array_stack {
   long type_size;
 };
 
-array_stack new_stack(long cap, long type_size);
+array_stack new_astack(long cap, long type_size);
 int astack_is_empty(array_stack *stack);
 int astack_peek(array_stack *stack, void *data);
 int astack_pop(array_stack *stack, void *data);
 int astack_push(array_stack *stack, const void *data);
+#define astack_release(...)                                                    \
+  do {                                                                         \
+    void *p[] = {__VA_ARGS__};                                                 \
+    for (int i = 0; i < sizeof(p) / sizeof(p[0]); i++) {                       \
+      free(((array_stack *)p[i])->data);                                       \
+      p[i] = NULL;                                                             \
+    }                                                                          \
+  } while (0);
+
 #define astack_print(stack, sep, type)                                         \
   {                                                                            \
     printf("[");                                                               \

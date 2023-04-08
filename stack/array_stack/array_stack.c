@@ -5,7 +5,7 @@
 #define __new_stack(cap) malloc(cap)
 #define __index(stack, index) (stack->data + index * stack->type_size)
 
-array_stack new_stack(long cap, long type_size) {
+array_stack new_astack(long cap, long type_size) {
   if (cap < 0)
     cap = 0;
 
@@ -19,7 +19,9 @@ array_stack new_stack(long cap, long type_size) {
   return stack;
 }
 
-int astack_is_empty(array_stack *stack) { return stack->top == 0; }
+int astack_is_empty(array_stack *stack) {
+  return stack->top == 0 || stack == NULL;
+}
 
 int astack_peek(array_stack *stack, void *data) {
   if (astack_is_empty(stack))
