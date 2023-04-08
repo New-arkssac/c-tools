@@ -45,13 +45,13 @@ void *array_ptr(array_buffer *src);
 void array_release(int num, ...);
 
 // Print all elements in the buffer.
-#define array_print(array, sep, type)                                           \
+#define array_print(array, sep, type)                                          \
   {                                                                            \
     type elem;                                                                 \
     int err;                                                                   \
     printf("[");                                                               \
-    for (int i = 0; i < array.lenght; i++) {                                     \
-      if ((err = array_get(&array, &elem, i)) != 0) {                           \
+    for (int i = 0; i < array.lenght; i++) {                                   \
+      if ((err = array_get(&array, &elem, i)) != 0) {                          \
         return err;                                                            \
       }                                                                        \
       printf(sep, elem);                                                       \

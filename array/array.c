@@ -5,7 +5,7 @@
 #define __new_a_bufferer(cap) malloc(cap);
 #define array_check(buffer)                                                    \
   ({                                                                           \
-    array_null(s)      ? ERR_NULL_POINTER                                     \
+    array_null(s)       ? ERR_NULL_POINTER                                     \
     : s->lenght == 0    ? ERR_ZERO_LENGHT                                      \
     : index > s->lenght ? ERR_INVALID_INDEX                                    \
                         : 0;                                                   \
@@ -127,8 +127,8 @@ int array_delete(array_buffer *s, array_buffer *news, long start, long end) {
 // Insert an element between the indices
 // if the start and end numbers are not adjacent and represent a range, the
 // elements within this range will be deleted before inserting the new element.
-int array_insert(array_buffer *s, void *const data, array_buffer *news, long start,
-                  long end) {
+int array_insert(array_buffer *s, void *const data, array_buffer *news,
+                 long start, long end) {
   array_buffer st = array_slice(s, 0, start);
   array_buffer en = array_slice(s, --end, s->lenght);
   array_buffer nb = new_array(st.lenght + en.lenght, s->type_size);
@@ -155,7 +155,8 @@ int array_insert(array_buffer *s, void *const data, array_buffer *news, long sta
 // Insert a bufferer
 // if the start and end numbers are not adjacent and represent a range, the
 // elements within this range will be deleted before inserting the new element.
-int array_imore(array_buffer *s, array_buffer *data, array_buffer *news, long start, long end) {
+int array_imore(array_buffer *s, array_buffer *data, array_buffer *news,
+                long start, long end) {
   int err;
   array_buffer st = array_slice(s, 0, start);
   array_buffer en = array_slice(s, --end, s->lenght);
