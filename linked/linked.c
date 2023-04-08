@@ -3,20 +3,20 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#define new_data(cap) malloc(cap);
-#define new_list(cap) malloc(cap);
-#define check_buffer(buffer)                                                   \
+#define __new_data(cap) malloc(cap);
+#define __new_list(cap) malloc(cap);
+#define __check_buffer(buffer)                                                 \
   (linked_check(buffer) ? ERR_LINKED_IS_NULL                                   \
                         : (buffer->lenght == 0         ? ERR_LINKED_IS_ZERO    \
                            : (index >= buffer->lenght) ? ERR_INVALID_INDEX     \
                                                        : 0))
-#define new_node()                                                             \
+#define __new_node()                                                           \
   ({                                                                           \
-    node = new_list(sizeof(linked_buffer));                                    \
+    node = __new_list(sizeof(linked_buffer));                                  \
     if (node == NULL)                                                          \
       return ERR_NULL_POINTER;                                                 \
                                                                                \
-    node->data = new_data(buffer->type_size);                                  \
+    node->data = __new_data(buffer->type_size);                                \
                                                                                \
     if (node->data == NULL) {                                                  \
       free(node);                                                              \
@@ -27,18 +27,6 @@
     node->next = NULL;                                                         \
     node;                                                                      \
   })
-
-#define node_free(node)                                                        \
-  {                                                                            \
-    free(node->data);                                                          \
-    free(node);                                                                \
-  }
-
-struct linked_list {
-  void *data;
-  linked_list *prev;
-  linked_list *next;
-};
 
 linked_list *get_node(linked_buffer *buffer, int index);
 linked_list *get_node(linked_buffer *buffer, int index) {
@@ -71,7 +59,7 @@ int linked_first_add(linked_buffer *buffer, void *data) {
     return ERR_LINKED_IS_NULL;
 
   linked_list *p = buffer->head;
-  linked_list *node = new_node();
+  linked_list *node = __new_node();
 
   if (p == NULL) {
     buffer->head = node;
@@ -92,7 +80,7 @@ int linked_after_add(linked_buffer *buffer, void *data) {
     return ERR_LINKED_IS_NULL;
 
   linked_list *p = buffer->head;
-  linked_list *node = new_node();
+  linked_list *node = __new_node();
   memcpy(node->data, data, buffer->type_size);
 
   if (p == NULL) {
@@ -109,7 +97,7 @@ int linked_after_add(linked_buffer *buffer, void *data) {
 }
 
 int linked_get(linked_buffer *buffer, void *data, int index) {
-  int err = check_buffer(buffer);
+  int err = __check_buffer(buffer);
   if (err != 0)
     return err;
 
@@ -118,7 +106,7 @@ int linked_get(linked_buffer *buffer, void *data, int index) {
 }
 
 int linked_modify(linked_buffer *buffer, void *data, int index) {
-  int err = check_buffer(buffer);
+  int err = __check_buffer(buffer);
   if (err != 0)
     return err;
 
@@ -127,7 +115,7 @@ int linked_modify(linked_buffer *buffer, void *data, int index) {
 }
 
 int linked_insert(linked_buffer *buffer, void *data, int index) {
-  int err = check_buffer(buffer);
+  int err = __check_buffer(buffer);
   if (err != 0)
     return err;
 
@@ -138,7 +126,7 @@ int linked_insert(linked_buffer *buffer, void *data, int index) {
   else {
     linked_list *curr_node = get_node(buffer, index);
     linked_list *prev_node = curr_node->prev;
-    linked_list *node = new_node();
+    linked_list *node = __new_node();
 
     prev_node->next = node;
     node->prev = prev_node;
@@ -152,7 +140,7 @@ int linked_insert(linked_buffer *buffer, void *data, int index) {
 }
 
 int linked_delete(linked_buffer *buffer, int index) {
-  int err = check_buffer(buffer);
+  int err = __check_buffer(buffer);
   if (err != 0)
     return err;
 
@@ -160,7 +148,8 @@ int linked_delete(linked_buffer *buffer, int index) {
     linked_list *p = buffer->head;
     p->prev = NULL;
     buffer->head = p->next;
-    node_free(p);
+    free(p->data);
+    free(p);
   } else {
     linked_list *curr_node = get_node(buffer, index - 1);
     linked_list *prev_node = curr_node->prev;
@@ -170,7 +159,8 @@ int linked_delete(linked_buffer *buffer, int index) {
     else
       prev_node->next->prev = prev_node;
 
-    node_free(curr_node);
+    free(curr_node->data);
+    free(curr_node);
   }
 
   buffer->lenght--;
@@ -195,27 +185,6 @@ int linked_append(linked_buffer *buffer, linked_buffer *add, int index) {
   return 0;
 }
 
-int linked_check(linked_buffer *head) { return head == NULL; }
-
-void linked_release(int n, ...) {
-  va_list list;
-  linked_buffer *f;
-  linked_list *node, *p;
-  va_start(list, n);
-  for (int i = 0; i < n; i++) {
-    f = va_arg(list, linked_buffer *);
-    node = f->head;
-    while (node != NULL) {
-      p = node;
-      node = p->next;
-      node_free(p);
-    }
-
-    f->head = NULL;
-    f->tail = NULL;
-    f->lenght = 0;
-    f->type_size = 0;
-  }
-
-  va_end(list);
+int linked_check(linked_buffer *buffer) {
+  return buffer == NULL || buffer->head == NULL;
 }

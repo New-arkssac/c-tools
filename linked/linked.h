@@ -2,7 +2,7 @@
 #define __linked_BUFFER
 
 enum {
-  ERR_NULL_POINTER = 1,
+  ERR_NULL_POINTER = 10,
   ERR_LINKED_IS_ZERO,
   ERR_INVALID_INDEX,
   ERR_LINKED_IS_NULL,
@@ -11,6 +11,12 @@ enum {
 
 typedef struct linked_buffer linked_buffer;
 typedef struct linked_list linked_list;
+
+struct linked_list {
+  void *data;
+  linked_list *prev;
+  linked_list *next;
+};
 
 struct linked_buffer {
   linked_list *head;
@@ -28,16 +34,37 @@ int linked_modify(linked_buffer *buffer, void *data, int index);
 int linked_insert(linked_buffer *buffer, void *data, int index);
 int linked_delete(linked_buffer *buffer, int index);
 int linked_check(linked_buffer *buffer);
-void linked_release(int n, ...);
+
+#define linked_release(...)                                                    \
+  do {                                                                         \
+    linked_buffer *f[] = {__VA_ARGS__};                                        \
+    linked_list *node, *p;                                                     \
+    for (int i = 0; i < sizeof(f) / sizeof(f[0]); i++) {                       \
+      node = f[i]->head;                                                       \
+      while (node != NULL) {                                                   \
+        p = node;                                                              \
+        node = p->next;                                                        \
+        free(p->data);                                                         \
+        free(p);                                                               \
+      }                                                                        \
+                                                                               \
+      f[i]->head = NULL;                                                       \
+      f[i]->tail = NULL;                                                       \
+      f[i]->lenght = 0;                                                        \
+      f[i]->type_size = 0;                                                     \
+    }                                                                          \
+  } while (0);
 
 #define linked_print(buffer, sep, type)                                        \
-  {                                                                            \
+  do {                                                                         \
     printf("[");                                                               \
     type elem;                                                                 \
+    int err;                                                                   \
     for (int i = 0; i < buffer.lenght; i++) {                                  \
-      linked_get(&buffer, &elem, i);                                           \
+      if ((err = linked_get(&buffer, &elem, i) != 0))                          \
+        break;                                                                 \
       printf(sep, elem);                                                       \
     }                                                                          \
     printf("]\n");                                                             \
-  }
+  } while (0)
 #endif /* ifndef __linked_BUFFER */
