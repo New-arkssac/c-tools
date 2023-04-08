@@ -10,9 +10,8 @@ int array_perfix(array_buffer s, array_buffer perfix) {
   int s_len = s.lenght;
   int perfix_len = perfix.lenght;
 
-  if (s_len == 0 || perfix_len == 0 || s_len < perfix_len || array_null(&s)) {
+  if (s_len == 0 || perfix_len == 0 || s_len < perfix_len || array_null(&s))
     return 0;
-  }
 
   array_buffer sep = s;
 
@@ -21,9 +20,8 @@ int array_perfix(array_buffer s, array_buffer perfix) {
     array_get(&sep, &n, i);
     array_get(&perfix, &m, i);
 
-    if (n != m) {
+    if (n != m)
       return 0;
-    }
   }
 
   return 1;
@@ -35,9 +33,8 @@ int array_suffix(array_buffer s, array_buffer suffix) {
   int s_len = s.lenght;
   int suffix_len = suffix.lenght;
 
-  if (s_len == 0 || suffix_len == 0 || s_len < suffix_len || array_null(&s)) {
+  if (s_len == 0 || suffix_len == 0 || s_len < suffix_len || array_null(&s))
     return 0;
-  }
 
   array_buffer sep = s;
 
@@ -48,9 +45,8 @@ int array_suffix(array_buffer s, array_buffer suffix) {
     array_get(&sep, &n, i);
     array_get(&suffix, &m, i);
 
-    if (n != m) {
+    if (n != m)
       return 0;
-    }
   }
 
   return 1;
@@ -61,9 +57,8 @@ int array_suffix(array_buffer s, array_buffer suffix) {
 int array_index(array_buffer s, array_buffer sep) {
   int s_len = s.lenght;
   int sep_len = sep.lenght;
-  if (s_len <= 0 || sep_len <= 0) {
+  if (s_len <= 0 || sep_len <= 0)
     return -1;
-  }
 
   int sep_hash = hash_buffer(&sep), s_hash = 0, k, j;
   void *ma = array_ptr(&s);
@@ -72,9 +67,8 @@ int array_index(array_buffer s, array_buffer sep) {
   char c1, c2;
   for (int i = 0, sp; i <= s_len - sep_len; i += sp) {
     sp = utf8_buffer(*(char *)(ma + i));
-    if (sp == -1) {
+    if (sp == -1)
       break;
-    }
 
     sh.buffer = ma + i;
     s_hash = hash_buffer(&sh);
@@ -90,9 +84,8 @@ int array_index(array_buffer s, array_buffer sep) {
         break;
     }
 
-    if (j == sep_len) {
+    if (j == sep_len)
       return i;
-    }
   }
 
   return -1;
@@ -106,9 +99,8 @@ int array_contains(array_buffer s, array_buffer substr) {
 // Count the number of times the substring appears in the main string.
 int array_count(array_buffer s, array_buffer sep) {
   int sep_len = sep.lenght;
-  if (sep_len <= 0) {
+  if (sep_len <= 0)
     return -1;
-  }
 
   int num = 0;
   array_buffer sub;
@@ -116,10 +108,9 @@ int array_count(array_buffer s, array_buffer sep) {
 
   for (int n = 0, i = 0;;) {
     n = array_index(sub, sep);
-    array_release(1, &sub);
-    if (n == -1) {
+    array_release(&sub);
+    if (n == -1)
       return num;
-    }
 
     num++;
     i += n + sep_len;
@@ -138,12 +129,12 @@ int array_cut(array_buffer s, array_buffer sep, array_buffer *result) {
     array_buffer before = array_slice(&s, 0, i);
     array_buffer after = array_slice(&s, i + sep.lenght, s.lenght);
     if ((err = array_add(&bk, &before)) != 0) {
-      array_release(3, &bk, &before, &after);
+      array_release(&bk, &before, &after);
       return err;
     }
 
     if ((err = array_add(&bk, &after)) != 0) {
-      array_release(3, &bk, &before, &after);
+      array_release(&bk, &before, &after);
       return err;
     }
 
@@ -156,9 +147,8 @@ int array_cut(array_buffer s, array_buffer sep, array_buffer *result) {
 
 // Concatenate strings in the buffer with sep to form a single buffer.
 int array_join(array_buffer s, array_buffer sep, array_buffer *result) {
-  if (s.type_size != sizeof(array_buffer)) {
+  if (s.type_size != sizeof(array_buffer))
     return ERR_TYPE_SIZE_NOT_EQUAL;
-  }
 
   switch (s.lenght) {
   case 0:
@@ -180,19 +170,19 @@ int array_join(array_buffer s, array_buffer sep, array_buffer *result) {
   array_buffer string = new_array(n, sizeof(char));
   array_get(&s, &tp, 0);
   if ((err = array_append(&string, &tp)) != 0) {
-    array_release(1, &string);
+    array_release(&string);
     return 1;
   }
 
   for (int i = 1; i < s.lenght; i++) {
     if ((err = array_append(&string, &sep)) != 0) {
-      array_release(1, &string);
+      array_release(&string);
       return 1;
     }
 
     array_get(&s, &tp, i);
     if ((err = array_append(&string, &tp)) != 0) {
-      array_release(1, &string);
+      array_release(&string);
       return 1;
     }
   }
@@ -207,18 +197,18 @@ unsigned int hash_buffer(array_buffer *s) {
   unsigned int hash = 0;
   char elem[s->type_size];
   for (int i = 0; i < s->lenght; i++) {
-    if (array_get(s, elem, i) != 0) {
+    if (array_get(s, elem, i) != 0)
       return -1;
-    };
+
     hash = (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
     hash += *elem;
   }
 
   unsigned int pow = 1, sp = prime_RK;
   for (int i = s->lenght; i > 0; i >>= 1) {
-    if ((i & 1) != 0) {
+    if ((i & 1) != 0)
       pow *= sp;
-    }
+
     sp *= sp;
   }
 
@@ -229,18 +219,15 @@ unsigned int hash_buffer(array_buffer *s) {
 // character sequence.
 int utf8_buffer(const char byte) {
   unsigned char bt = byte;
-  int len = 0;
-  if ((bt & 0x80) == 0x00) {
+  int len = -1;
+  if ((bt & 0x80) == 0x00)
     len = 1;
-  } else if ((bt & 0xE0) == 0xC0) {
+  else if ((bt & 0xE0) == 0xC0)
     len = 2;
-  } else if ((bt & 0xF0) == 0xE0) {
+  else if ((bt & 0xF0) == 0xE0)
     len = 3;
-  } else if ((bt & 0xF8) == 0xF0) {
+  else if ((bt & 0xF8) == 0xF0)
     len = 4;
-  } else {
-    return -1;
-  }
 
   return len;
 }

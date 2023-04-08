@@ -42,21 +42,32 @@ int array_modify(array_buffer *src, void *const data, long index);
 int array_clone(array_buffer *src, array_buffer *news);
 int array_null(array_buffer *src);
 void *array_ptr(array_buffer *src);
-void array_release(int num, ...);
+
+// Release some bufferer.
+#define array_release(...)                                                     \
+  do {                                                                         \
+    array_buffer *f[] = {__VA_ARGS__};                                         \
+    for (size_t i = 0; i < sizeof(f) / sizeof(f[0]); i++) {            \
+      free(f[i]->buffer);                                                      \
+      f[i]->buffer = NULL;                                                     \
+      f[i]->lenght = 0;                                                        \
+      f[i]->cap = 0;                                                           \
+      f[i]->type_size = 0;                                                     \
+    }                                                                          \
+  } while (0)
 
 // Print all elements in the buffer.
 #define array_print(array, sep, type)                                          \
-  {                                                                            \
+  do {                                                                         \
     type elem;                                                                 \
     int err;                                                                   \
     printf("[");                                                               \
     for (int i = 0; i < array.lenght; i++) {                                   \
-      if ((err = array_get(&array, &elem, i)) != 0) {                          \
-        return err;                                                            \
-      }                                                                        \
+      if ((err = array_get(&array, &elem, i)) != 0)                            \
+        break;                                                                 \
       printf(sep, elem);                                                       \
     }                                                                          \
     printf("]\n");                                                             \
-  }
+  } while (0)
 
 #endif /* ifndef __BUFFER */
