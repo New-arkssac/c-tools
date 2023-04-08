@@ -19,7 +19,7 @@ struct linked_buffer {
   long type_size;
 };
 
-linked_buffer new_buffer(long type_size);
+linked_buffer new_linked(long type_size);
 int linked_get(linked_buffer *buffer, void *data, int index);
 int linked_first_add(linked_buffer *buffer, void *data);
 int linked_after_add(linked_buffer *buffer, void *data);
