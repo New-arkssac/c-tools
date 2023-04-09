@@ -10,7 +10,7 @@ int array_perfix(array_buffer s, array_buffer perfix) {
   int s_len = s.lenght;
   int perfix_len = perfix.lenght;
 
-  if (s_len == 0 || perfix_len == 0 || s_len < perfix_len || array_null(&s))
+  if (s_len == 0 || perfix_len == 0 || s_len < perfix_len || !array_valid(&s))
     return 0;
 
   array_buffer sep = s;
@@ -33,7 +33,7 @@ int array_suffix(array_buffer s, array_buffer suffix) {
   int s_len = s.lenght;
   int suffix_len = suffix.lenght;
 
-  if (s_len == 0 || suffix_len == 0 || s_len < suffix_len || array_null(&s))
+  if (s_len == 0 || suffix_len == 0 || s_len < suffix_len || !array_valid(&s))
     return 0;
 
   array_buffer sep = s;

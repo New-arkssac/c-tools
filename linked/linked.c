@@ -90,7 +90,6 @@ int linked_after_add(linked_buffer *buffer, void *data) {
 
   linked_list *p = buffer->head;
   linked_list *node = __new_node();
-  memcpy(node->data, data, buffer->type_size);
 
   if (p == NULL) {
     buffer->head = node;
@@ -101,6 +100,7 @@ int linked_after_add(linked_buffer *buffer, void *data) {
     buffer->tail = node;
   }
 
+  memcpy(node->data, data, buffer->type_size);
   buffer->lenght++;
   return 0;
 }

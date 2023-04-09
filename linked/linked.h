@@ -36,7 +36,7 @@ int linked_insert(linked_buffer *buffer, void *data, int index);
 int linked_delete(linked_buffer *buffer, int index);
 void linked_close(linked_buffer *buffer);
 
-#define linked_valid(buffer) (buffer != NULL && (buffer)->head != NULL)
+#define linked_valid(buffer) (buffer != NULL)
 #define linked_is_empty(buffer) (!linked_valid(buffer) || (buffer->lenght) == 0)
 
 #define linked_batch_closes(...)                                               \

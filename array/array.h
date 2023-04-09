@@ -40,9 +40,9 @@ int array_add(array_buffer *src, void *const data);
 int array_get(array_buffer *src, void *const data, long index);
 int array_modify(array_buffer *src, void *const data, long index);
 int array_clone(array_buffer *src, array_buffer *news);
-int array_null(array_buffer *src);
 void *array_ptr(array_buffer *src);
 
+#define array_valid(array) (array != NULL && (array)->buffer != NULL)
 // Release some bufferer.
 #define array_release(...)                                                     \
   do {                                                                         \

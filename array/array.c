@@ -5,10 +5,10 @@
 #define __new_a_bufferer(cap) malloc(cap)
 #define __array_check(buffer)                                                  \
   ({                                                                           \
-    array_null(s)       ? ERR_NULL_POINTER                                     \
-    : s->lenght == 0    ? ERR_ZERO_LENGHT                                      \
-    : index > s->lenght ? ERR_INVALID_INDEX                                    \
-                        : 0;                                                   \
+    !array_valid(buffer) ? ERR_NULL_POINTER                                    \
+    : s->lenght == 0     ? ERR_ZERO_LENGHT                                     \
+    : index > s->lenght  ? ERR_INVALID_INDEX                                   \
+                         : 0;                                                   \
   })
 int expansion(array_buffer *src);
 
@@ -49,7 +49,7 @@ int array_append(array_buffer *src, array_buffer *data) {
 // Add an element to the end of the bufferer.
 int array_add(array_buffer *s, void *const data) {
   int err;
-  if ((s->lenght >= s->cap || array_null(s)) && (err = expansion(s) != 0))
+  if ((s->lenght >= s->cap || !array_valid(s)) && (err = expansion(s) != 0))
     return err;
 
   memcpy(s->buffer + s->lenght++ * s->type_size, data, s->type_size);
@@ -194,12 +194,9 @@ int array_clone(array_buffer *src, array_buffer *news) {
   return 0;
 }
 
-// Check if the buffer is equal to null
-int array_null(array_buffer *src) { return src == NULL || src->buffer == NULL; }
-
 // Return buffer pointer
 void *array_ptr(array_buffer *src) {
-  return (array_null(src) ? NULL : src->buffer);
+  return (!array_valid(src) ? NULL : src->buffer);
 }
 
 // dynamic expansion

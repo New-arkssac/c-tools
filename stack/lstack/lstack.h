@@ -23,7 +23,7 @@ int lstack_pop(lstack *stack, void *data);
 int lstack_push(lstack *stack, const void *data);
 void lstack_close(lstack *stack);
 
-#define lstack_valid(stack) (stack != NULL && (stack)->head != NULL)
+#define lstack_valid(stack) (stack != NULL)
 #define lstack_is_empty(stack) (!lstack_valid(stack) || stack->cap == 0)
 
 #define lstack_batch_close(...)                                                \

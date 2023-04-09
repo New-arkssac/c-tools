@@ -11,7 +11,7 @@
     if (node == NULL)                                                          \
       return ERR_NULL_POINTER;                                                 \
                                                                                \
-    node->data = __new_data(stack->type_size);                                 \
+    node->data = __new_data((stack)->type_size);                               \
                                                                                \
     if (node->data == NULL) {                                                  \
       free(node);                                                              \
