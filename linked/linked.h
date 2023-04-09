@@ -23,6 +23,7 @@ struct linked_buffer {
   linked_list *tail;
   long lenght;
   long type_size;
+  int closed : 1;
 };
 
 linked_buffer new_linked(long type_size);
@@ -33,27 +34,17 @@ int linked_append(linked_buffer *buffer, linked_buffer *add, int index);
 int linked_modify(linked_buffer *buffer, void *data, int index);
 int linked_insert(linked_buffer *buffer, void *data, int index);
 int linked_delete(linked_buffer *buffer, int index);
-int linked_check(linked_buffer *buffer);
+void linked_close(linked_buffer *buffer);
 
-#define linked_release(...)                                                    \
+#define linked_valid(buffer) (buffer != NULL && (buffer)->head != NULL)
+#define linked_is_empty(buffer) (!linked_valid(buffer) || (buffer->lenght) == 0)
+
+#define linked_batch_closes(...)                                               \
   do {                                                                         \
     linked_buffer *f[] = {__VA_ARGS__};                                        \
-    linked_list *node, *p;                                                     \
-    for (int i = 0; i < sizeof(f) / sizeof(f[0]); i++) {                       \
-      node = f[i]->head;                                                       \
-      while (node != NULL) {                                                   \
-        p = node;                                                              \
-        node = p->next;                                                        \
-        free(p->data);                                                         \
-        free(p);                                                               \
-      }                                                                        \
-                                                                               \
-      f[i]->head = NULL;                                                       \
-      f[i]->tail = NULL;                                                       \
-      f[i]->lenght = 0;                                                        \
-      f[i]->type_size = 0;                                                     \
-    }                                                                          \
-  } while (0);
+    for (int i = 0; i < sizeof(f) / sizeof(f[0]); i++)                         \
+      linked_close(f[i]);                                                      \
+  } while (0)
 
 #define linked_print(buffer, sep, type)                                        \
   do {                                                                         \

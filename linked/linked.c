@@ -1,15 +1,17 @@
 #include "linked.h"
 #include <memory.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #define __new_data(cap) malloc(cap);
 #define __new_list(cap) malloc(cap);
 #define __check_buffer(buffer)                                                 \
-  (linked_check(buffer) ? ERR_LINKED_IS_NULL                                   \
-                        : (buffer->lenght == 0         ? ERR_LINKED_IS_ZERO    \
-                           : (index >= buffer->lenght) ? ERR_INVALID_INDEX     \
-                                                       : 0))
+  (!linked_valid(buffer) ? ERR_LINKED_IS_NULL                                  \
+                         : (buffer->lenght == 0         ? ERR_LINKED_IS_ZERO   \
+                            : (index >= buffer->lenght) ? ERR_INVALID_INDEX    \
+                                                        : 0))
+
 #define __new_node()                                                           \
   ({                                                                           \
     node = __new_list(sizeof(linked_buffer));                                  \
@@ -27,6 +29,12 @@
     node->next = NULL;                                                         \
     node;                                                                      \
   })
+
+#define die(n, msg)                                                            \
+  {                                                                            \
+    perror(msg);                                                               \
+    exit(n);                                                                   \
+  }
 
 linked_list *get_node(linked_buffer *buffer, int index);
 linked_list *get_node(linked_buffer *buffer, int index) {
@@ -49,13 +57,14 @@ linked_buffer new_linked(long type_size) {
       .tail = NULL,
       .lenght = 0,
       .type_size = type_size,
+      .closed = 0,
   };
 
   return head;
 }
 
 int linked_first_add(linked_buffer *buffer, void *data) {
-  if (linked_check(buffer))
+  if (!linked_valid(buffer))
     return ERR_LINKED_IS_NULL;
 
   linked_list *p = buffer->head;
@@ -76,7 +85,7 @@ int linked_first_add(linked_buffer *buffer, void *data) {
 }
 
 int linked_after_add(linked_buffer *buffer, void *data) {
-  if (linked_check(buffer))
+  if (!linked_valid(buffer))
     return ERR_LINKED_IS_NULL;
 
   linked_list *p = buffer->head;
@@ -168,7 +177,7 @@ int linked_delete(linked_buffer *buffer, int index) {
 }
 
 int linked_append(linked_buffer *buffer, linked_buffer *add, int index) {
-  if (linked_check(buffer) || linked_check(add))
+  if (!linked_valid(buffer) || !linked_valid(add))
     return ERR_LINKED_IS_NULL;
 
   if (buffer->type_size != add->type_size)
@@ -185,6 +194,23 @@ int linked_append(linked_buffer *buffer, linked_buffer *add, int index) {
   return 0;
 }
 
-int linked_check(linked_buffer *buffer) {
-  return buffer == NULL || buffer->head == NULL;
+void linked_close(linked_buffer *buffer) {
+  if (!linked_valid(buffer))
+    die(1, "lstack is a null pointer");
+
+  if (buffer->closed)
+    die(1, "closes an already closed linked buffer");
+
+  linked_list *node, *curr = buffer->head;
+  while (curr != NULL) {
+    node = curr;
+    curr = node->next;
+    free(node->data);
+    free(node);
+  }
+
+  buffer->head = NULL;
+  buffer->tail = NULL;
+  buffer->closed = 1;
+  buffer->lenght = buffer->type_size = 0;
 }
