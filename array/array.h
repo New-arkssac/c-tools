@@ -47,7 +47,7 @@ void *array_ptr(array_buffer *src);
 #define array_release(...)                                                     \
   do {                                                                         \
     array_buffer *f[] = {__VA_ARGS__};                                         \
-    for (size_t i = 0; i < sizeof(f) / sizeof(f[0]); i++) {            \
+    for (size_t i = 0; i < sizeof(f) / sizeof(f[0]); i++) {                    \
       free(f[i]->buffer);                                                      \
       f[i]->buffer = NULL;                                                     \
       f[i]->lenght = 0;                                                        \
